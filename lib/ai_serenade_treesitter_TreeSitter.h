@@ -199,6 +199,70 @@ JNIEXPORT void JNICALL Java_ai_serenade_treesitter_TreeSitter_treeDelete
 JNIEXPORT jobject JNICALL Java_ai_serenade_treesitter_TreeSitter_treeRootNode
   (JNIEnv *, jclass, jlong);
 
+/*
+ * Class:     ai_serenade_treesitter_TreeSitter
+ * Method:    queryNew
+ * Signature: (JLjava/lang/String;)Lai/serenade/treesitter/query/internals/QueryCreationResult;
+ */
+JNIEXPORT jobject JNICALL Java_ai_serenade_treesitter_TreeSitter_queryNew
+  (JNIEnv *, jclass, jlong, jstring);
+
+/*
+ * Class:     ai_serenade_treesitter_TreeSitter
+ * Method:    queryDelete
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_ai_serenade_treesitter_TreeSitter_queryDelete
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     ai_serenade_treesitter_TreeSitter
+ * Method:    queryCursorDelete
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_ai_serenade_treesitter_TreeSitter_queryCursorDelete
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     ai_serenade_treesitter_TreeSitter
+ * Method:    queryCursorNew
+ * Signature: ()J
+ */
+JNIEXPORT jlong JNICALL Java_ai_serenade_treesitter_TreeSitter_queryCursorNew
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     ai_serenade_treesitter_TreeSitter
+ * Method:    queryCursorNextMatch
+ * Signature: (J)Lai/serenade/treesitter/query/QueryMatch;
+ */
+JNIEXPORT jobject JNICALL Java_ai_serenade_treesitter_TreeSitter_queryCursorNextMatch
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     ai_serenade_treesitter_TreeSitter
+ * Method:    queryCursorExec
+ * Signature: (JJLai/serenade/treesitter/Node;)V
+ */
+JNIEXPORT void JNICALL Java_ai_serenade_treesitter_TreeSitter_queryCursorExec
+  (JNIEnv *, jclass, jlong, jlong, jobject);
+
+/*
+ * Class:     ai_serenade_treesitter_TreeSitter
+ * Method:    queryCaptureCount
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_ai_serenade_treesitter_TreeSitter_queryCaptureCount
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     ai_serenade_treesitter_TreeSitter
+ * Method:    queryCaptureNameForId
+ * Signature: (JI)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_ai_serenade_treesitter_TreeSitter_queryCaptureNameForId
+  (JNIEnv *, jclass, jlong, jint);
+
 #ifdef __cplusplus
 }
 #endif
