@@ -269,6 +269,11 @@ JNIEXPORT jstring JNICALL Java_ai_serenade_treesitter_TreeSitter_nodeType(
   return result;
 }
 
+JNIEXPORT jboolean JNICALL Java_ai_serenade_treesitter_TreeSitter_nodeIsNamed(
+    JNIEnv* env, jclass self, jobject node) {
+  return ts_node_is_named(_unmarshalNode(env, node));
+}
+
 JNIEXPORT jlong JNICALL
 Java_ai_serenade_treesitter_TreeSitter_parserNew(JNIEnv* env, jclass self) {
   jlong res = (jlong)ts_parser_new();

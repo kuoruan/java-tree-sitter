@@ -70,4 +70,17 @@ public class NodeTest extends TestBase {
       }
     }
   }
+
+  @Test
+  void testIsNamed() throws UnsupportedEncodingException {
+    try (Parser parser = new Parser()) {
+      parser.setLanguage(Languages.python());
+      try (Tree tree = parser.parseString("def foo(bar baz):\n  print(bar)\n  print(baz)")) {
+        Node root = tree.getRootNode();
+        Node functionDefinition = root.getChild(0);
+        assertTrue(functionDefinition.getChild(1).isNamed());
+        assertFalse(functionDefinition.getChild(3).isNamed());
+      }
+    }
+  }
 }

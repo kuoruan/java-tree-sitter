@@ -10,4 +10,13 @@ public class QueryCapture {
     this.id = id;
     this.name = name;
   }
+
+  public String getName() {
+    return this.name;
+  }
+
+  public int getId() {
+    return this.id;
+  }
+
 }

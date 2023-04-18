@@ -45,6 +45,8 @@ public class Node {
     return TreeSitter.nodeType(this);
   }
 
+  public boolean isNamed() {return TreeSitter.nodeIsNamed(this);}
+
   public TreeCursor walk() {
     return new TreeCursor(TreeSitter.treeCursorNew(this));
   }
