@@ -17,22 +17,22 @@ public class Query extends ResourceWithPointer {
 
         QueryCreationResult result = TreeSitter.queryNew(language, query);
         switch (result.errorType) {
-            case 1 -> {
+            case 1: {
                 throw new QuerySyntaxException("invalid syntax", result.errorOffset);
             }
-            case 2 -> {
+            case 2: {
                 throw new QueryNodeTypeException("invalid syntax", result.errorOffset);
             }
-            case 3 -> {
+            case 3: {
                 throw new QueryFieldException("invalid syntax", result.errorOffset);
             }
-            case 4 -> {
+            case 4: {
                 throw new QueryErrorCaptureException("invalid capture", result.errorOffset);
             }
-            case 5 -> {
+            case 5: {
                 throw new QueryErrorStructureException("invalid query structure", result.errorOffset);
             }
-            case 6 -> {
+            case 6: {
                 throw new QueryErrorLanguageException("invalid language", result.errorOffset);
             }
         }
@@ -61,7 +61,7 @@ public class Query extends ResourceWithPointer {
     }
 
     public long getPointer() {
-        return this.pointer;
+        return super.getPointer();
     }
 
     public QueryCursor execute(Node node) {

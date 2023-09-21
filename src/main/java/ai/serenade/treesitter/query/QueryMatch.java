@@ -1,7 +1,5 @@
 package ai.serenade.treesitter.query;
 
-import ai.serenade.treesitter.TreeSitter;
-
 import java.util.ArrayList;
 import java.util.List;
 

@@ -1,6 +1,5 @@
 package ai.serenade.treesitter.query;
 
-import ai.serenade.treesitter.Node;
 import ai.serenade.treesitter.TreeSitter;
 import ai.serenade.treesitter.query.internals.ResourceWithPointer;
 
@@ -16,10 +15,8 @@ public class QueryCursor extends ResourceWithPointer {
     }
 
     public QueryMatch nextMatch() {
-        QueryMatch queryMatch = TreeSitter.queryCursorNextMatch(this.pointer);
-        return queryMatch;
+        return TreeSitter.queryCursorNextMatch(this.pointer);
     }
-
 
     @Override
     protected void deleteObject() {

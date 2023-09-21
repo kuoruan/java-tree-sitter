@@ -1,7 +1,6 @@
 package ai.serenade.treesitter;
 
 import ai.serenade.treesitter.query.QueryMatch;
-import ai.serenade.treesitter.query.QueryMatchCapture;
 import ai.serenade.treesitter.query.internals.QueryCreationResult;
 
 public class TreeSitter {
@@ -25,6 +24,7 @@ public class TreeSitter {
     public static native String nodeString(Node node);
 
     public static native String nodeType(Node node);
+
     public static native boolean nodeIsNamed(Node node);
 
     public static native long parserNew();

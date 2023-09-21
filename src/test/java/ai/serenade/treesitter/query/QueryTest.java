@@ -18,12 +18,10 @@ public class QueryTest extends TestBase {
     void testQueryValid() throws UnsupportedEncodingException, QueryException {
         try (Parser parser = new Parser()) {
             parser.setLanguage(Languages.python());
-            String q = """
-                    (function_definition
-                    	name: (identifier) @name
-                      parameters: (parameters) @params
-                    )
-                """;
+            String q = "    (function_definition\n" +
+                       "    	name: (identifier) @name\n" +
+                       "      parameters: (parameters) @params\n" +
+                       "    )\n";
             try (Query query = new Query(Languages.python(), q)) {
                 assertNotNull(query);
                 System.out.println(query);
@@ -42,12 +40,10 @@ public class QueryTest extends TestBase {
             parser.setLanguage(Languages.python());
             try (Tree tree = parser.parseString("def foo(bar):\n  pass\n")) {
                 Node root = tree.getRootNode();
-                String q = """
-                        (function_definition
-                        	name: (identifier) @name
-                          parameters: (parameters) @params
-                        )
-                    """;
+                String q = "    (function_definition\n" +
+                           "    	name: (identifier) @name\n" +
+                           "      parameters: (parameters) @params\n" +
+                           "    )\n";
                 try (Query query = new Query(Languages.python(), q)) {
                     assertNotNull(query);
                     assertEquals(2, query.getCaptures().size());
@@ -80,12 +76,10 @@ public class QueryTest extends TestBase {
             parser.setLanguage(Languages.python());
             try (Tree tree = parser.parseString("def foo(bar):\n  pass\n")) {
                 Node root = tree.getRootNode();
-                String q = """
-                        (function_definition
-                        	name: (identifier)
-                          parameters: (parameters)
-                        )
-                    """;
+                String q = "    (function_definition\n" +
+                           "    	name: (identifier)\n" +
+                           "      parameters: (parameters)\n" +
+                           "    )\n";
                 try (Query query = new Query(Languages.python(), q)) {
                     assertNotNull(query);
                     assertEquals(0, query.getCaptures().size());
@@ -105,12 +99,10 @@ public class QueryTest extends TestBase {
     void testQueryInValid() throws UnsupportedEncodingException, QueryException {
         try (Parser parser = new Parser()) {
             parser.setLanguage(Languages.python());
-            String q = """
-                    (function_definition
-                    	name: (identifier) @name
-                        parameters: (parameters
-                    )
-                """;
+            String q = "    (function_definition\n" +
+                       "    	name: (identifier) @name\n" +
+                       "        parameters: (parameters\n" +
+                       "    )\n";
             assertThrows(QuerySyntaxException.class, () -> {
                 new Query(Languages.python(), q);
             });

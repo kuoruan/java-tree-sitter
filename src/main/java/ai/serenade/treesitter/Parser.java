@@ -7,27 +7,27 @@ import java.nio.charset.StandardCharsets;
 
 public class Parser extends ResourceWithPointer {
 
-  Parser(long pointer) {
-    super();
-    this.pointer = pointer;
-  }
+    Parser(long pointer) {
+        super();
+        this.pointer = pointer;
+    }
 
-  public Parser() {
-    this(TreeSitter.parserNew());
-  }
+    public Parser() {
+        this(TreeSitter.parserNew());
+    }
 
-  public void setLanguage(long language) {
-    TreeSitter.parserSetLanguage(pointer, language);
-  }
+    public void setLanguage(long language) {
+        TreeSitter.parserSetLanguage(pointer, language);
+    }
 
-  public Tree parseString(String source) throws UnsupportedEncodingException {
-    byte[] bytes = source.getBytes(StandardCharsets.UTF_16LE);
-    return new Tree(TreeSitter.parserParseBytes(pointer, bytes, bytes.length));
-  }
+    public Tree parseString(String source) throws UnsupportedEncodingException {
+        byte[] bytes = source.getBytes(StandardCharsets.UTF_16LE);
+        return new Tree(TreeSitter.parserParseBytes(pointer, bytes, bytes.length));
+    }
 
 
-  @Override
-  protected void deleteObject() {
-    TreeSitter.parserDelete(pointer);
-  }
+    @Override
+    protected void deleteObject() {
+        TreeSitter.parserDelete(pointer);
+    }
 }
