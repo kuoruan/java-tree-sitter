@@ -5,3 +5,5 @@ build
 *.dylib
 *.log
 *~
+bin
+.idea

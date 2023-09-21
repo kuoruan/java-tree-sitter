@@ -17,33 +17,33 @@ def build(repositories, output_path="libjava-tree-sitter", arch=None, verbose=Fa
         else:
             arch = "arm64" if "aarch64" in arch else arch
 
-    if platform.system() == 'Darwin':
-        output_extention = 'dylib'
-    elif platform.system() == 'Linux':
-        output_extention = 'so'
+    output_extension = ""
+    if platform.system() == "Darwin":
+        output_extension = "dylib"
+    elif platform.system() == "Linux":
+        output_extension = "so"
+    elif platform.system() == "Windows":
+        output_extension = "dll"
     else:
-        output_extention = 'dll'
+        print(f"Unsupported platform: {platform.system()}")
+        sys.exit(1)
 
-    output_path = f"{output_path}.{output_extention}"
+    output_path = f"{output_path}.{output_extension}"
     here = os.path.dirname(os.path.realpath(__file__))
-    env = ""
-    if arch:
-        env += (
-            f"CFLAGS='-arch {arch} -mmacosx-version-min=11.0' LDFLAGS='-arch {arch}'"
-            if platform.system() == "Darwin"
-            else f"CFLAGS='-m{arch}' LDFLAGS='-m{arch}'"
-        )
 
-    os.system(
-        f"make -C \"{os.path.join(here, 'tree-sitter')}\" clean {'> /dev/null' if not verbose else ''}"
-    )
-    os.system(
-        f"{env} make -C \"{os.path.join(here, 'tree-sitter')}\" {'> /dev/null' if not verbose else ''}"
-    )
+    if arch:
+        if platform.system() == "Darwin":
+            os.environ["CMAKE_OSX_DEPLOYMENT_TARGET"] = "11.0"
+            os.environ["CFLAGS"] = f"-arch {arch}"
+            os.environ["LDFLAGS"] = f"-arch {arch}"
+        else:
+            os.environ["CFLAGS"] = f"-m{arch}"
+            os.environ["LDFLAGS"] = f"-m{arch}"
 
     source_paths = [
         os.path.join(here, "lib", "ai_serenade_treesitter_TreeSitter.cc"),
         os.path.join(here, "lib", "ai_serenade_treesitter_Languages.cc"),
+        os.path.join(here, "tree-sitter", "lib", "src", "lib.c"),
     ]
 
     compiler = distutils.ccompiler.new_compiler()
@@ -57,8 +57,20 @@ def build(repositories, output_path="libjava-tree-sitter", arch=None, verbose=Fa
         elif os.path.exists(scanner_c):
             source_paths.append(scanner_c)
 
+        language_name = ""
+        # languages/tree-sitter-typescript/typescript -> TYPESCRIPT
+        # languages/tree-sitter-javascript -> JAVASCRIPT
+
+        # get last part of path
+        last_part = os.path.split(repository.rstrip("/"))[1]
+        # if contains tree-sitter- remove it
+        if last_part.startswith("tree-sitter-"):
+            language_name = last_part.split("tree-sitter-")[-1]
+        else:
+            language_name = last_part
+
         compiler.define_macro(
-            f"TS_LANGUAGE_{os.path.split(repository.rstrip('/'))[1].split('tree-sitter-')[-1].replace('-', '_').upper()}",
+            f"TS_LANGUAGE_{language_name.replace('-', '_').upper()}",
             "1",
         )
 
@@ -76,16 +88,20 @@ def build(repositories, output_path="libjava-tree-sitter", arch=None, verbose=Fa
     with tempfile.TemporaryDirectory(suffix="tree_sitter_language") as out_dir:
         object_paths = []
         for source_path in source_paths:
-            flags = ["-O3"]
+            flags = []
+            if platform.system() == "Windows":
+                flags = ["/O2"]
+            else:
+                flags = ["-O3", "-fPIC"]
 
-            if platform.system() == "Linux" or platform.system() == "Windows":
-                flags.append("-fPIC")
-
-            if source_path.endswith(".c"):
-                flags.append("-std=c99")
+            if platform.system() != "Windows" and source_path.endswith(".c"):
+                flags.append("-std=gnu99")
 
             if arch:
-                flags += ["-arch", arch] if platform.system() == "Darwin" else [f"-m{arch}"]
+                if platform.system() == "Darwin":
+                    flags += ["-arch", arch]
+                elif platform.system() == "Linux":
+                    flags += [f"-m{arch}"]
 
             include_dirs = [
                 os.path.dirname(source_path),
@@ -113,16 +129,19 @@ def build(repositories, output_path="libjava-tree-sitter", arch=None, verbose=Fa
         if platform.system() == "Darwin":
             extra_preargs.append("-dynamiclib")
         elif platform.system() == "Windows":
-            extra_preargs.append("-shared")
+            extra_preargs.append("/DLL")
 
         if arch:
-            extra_preargs += ["-arch", arch] if platform.system() == "Darwin" else [f"-m{arch}"]
+            if platform.system() == "Darwin":
+                extra_preargs += ["-arch", arch]
+            elif platform.system() == "Linux":
+                extra_preargs += [f"-m{arch}"]
 
         compiler.link_shared_object(
             object_paths,
             output_path,
             extra_preargs=extra_preargs,
-            extra_postargs=[os.path.join(here, "tree-sitter", "libtree-sitter.a")],
+            extra_postargs=[],
             library_dirs=[os.path.join(here, "tree-sitter")],
         )
 

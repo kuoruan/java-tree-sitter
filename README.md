@@ -21,7 +21,8 @@ git submodule update --init --recursive
 ## Installing
 
 To add this library to a Gradle project:
-```java
+
+```gradle
 allprojects {
     repositories {
         maven { 
@@ -37,7 +38,9 @@ dependencies {
 
 ## Building
 
-Before you can start using java-tree-sitter, you need to build a shared library that Java can load using the `build.py` script. The first argument is the output file (_libjava-tree-sitter_ by default), followed by all of the tree-sitter repositories (already downloaded) that you want to include:
+Before you can start using java-tree-sitter, you need to build a shared library that Java can load using the `build.py`
+script. The first argument is the output file (_libjava-tree-sitter_ by default), followed by all of the tree-sitter
+repositories (already downloaded) that you want to include:
 
 ```shell
 ./build.py -o libjava-tree-sitter path-to-tree-sitter-css path-to-tree-sitter-python ...
@@ -89,7 +92,8 @@ try (Parser parser = new Parser()) {
 }
 ```
 
-If you're going to be traversing a tree, then you can use the `walk` method, which is much more efficient than the above getters:
+If you're going to be traversing a tree, then you can use the `walk` method, which is much more efficient than the above
+getters:
 
 ```java
 try (Parser parser = new Parser()) {

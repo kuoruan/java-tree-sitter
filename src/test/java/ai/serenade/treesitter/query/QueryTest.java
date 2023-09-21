@@ -15,7 +15,7 @@ public class QueryTest extends TestBase {
     Logger logger = Logger.getLogger("bla");
 
     @Test
-    void testQueryValid() throws UnsupportedEncodingException, QueryException {
+    void testQueryValid() throws QueryException {
         try (Parser parser = new Parser()) {
             parser.setLanguage(Languages.python());
             String q = "    (function_definition\n" +
@@ -24,7 +24,6 @@ public class QueryTest extends TestBase {
                        "    )\n";
             try (Query query = new Query(Languages.python(), q)) {
                 assertNotNull(query);
-                System.out.println(query);
                 assertNotEquals(0, query.getPointer());
                 List<QueryCapture> captures = query.getCaptures();
                 assertEquals(2, query.getCaptures().size());

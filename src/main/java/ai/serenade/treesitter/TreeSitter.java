@@ -3,6 +3,8 @@ package ai.serenade.treesitter;
 import ai.serenade.treesitter.query.QueryMatch;
 import ai.serenade.treesitter.query.internals.QueryCreationResult;
 
+import java.io.UnsupportedEncodingException;
+
 public class TreeSitter {
 
     public static native Node nodeChild(Node node, int child);
@@ -33,7 +35,7 @@ public class TreeSitter {
 
     public static native void parserSetLanguage(long parser, long language);
 
-    public static native long parserParseBytes(long parser, byte[] source, int length);
+    public static native long parserParseBytes(long parser, byte[] source, int length) throws UnsupportedEncodingException;
 
     public static native long treeCursorNew(Node node);
 

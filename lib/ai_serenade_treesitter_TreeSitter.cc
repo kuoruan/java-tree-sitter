@@ -169,15 +169,14 @@ jobject _marshalNode(JNIEnv* env, TSNode node) {
 }
 
 TSNode _unmarshalNode(JNIEnv* env, jobject javaObject) {
-  return (TSNode){
-      {
-          (uint32_t)env->GetIntField(javaObject, _nodeContext0Field),
-          (uint32_t)env->GetIntField(javaObject, _nodeContext1Field),
-          (uint32_t)env->GetIntField(javaObject, _nodeContext2Field),
-          (uint32_t)env->GetIntField(javaObject, _nodeContext3Field),
-      },
-      (const void*)env->GetLongField(javaObject, _nodeIdField),
-      (const TSTree*)env->GetLongField(javaObject, _nodeTreeField)};
+  TSNode node;
+  node.context[0] = (uint32_t)env->GetIntField(javaObject, _nodeContext0Field);
+  node.context[1] = (uint32_t)env->GetIntField(javaObject, _nodeContext1Field);
+  node.context[2] = (uint32_t)env->GetIntField(javaObject, _nodeContext2Field);
+  node.context[3] = (uint32_t)env->GetIntField(javaObject, _nodeContext3Field);
+  node.id = (const void*)env->GetLongField(javaObject, _nodeIdField);
+  node.tree = (const TSTree*)env->GetLongField(javaObject, _nodeTreeField);
+  return node;
 }
 
 jobject _marshalTreeCursorNode(JNIEnv* env, TreeCursorNode node) {
@@ -208,7 +207,7 @@ JNIEXPORT jobject JNICALL Java_ai_serenade_treesitter_TreeSitter_nodeChildByFiel
     JNIEnv* env, jclass self, jobject node, jstring fieldName) {
   const char* fieldNameChars = env->GetStringUTFChars(fieldName, NULL);
 
-  TSNode ts_node = ts_node_child_by_field_name(_unmarshalNode(env, node), fieldNameChars, strlen(fieldNameChars));
+  TSNode ts_node = ts_node_child_by_field_name(_unmarshalNode(env, node), fieldNameChars, (uint32_t)strlen(fieldNameChars));
 
   if (!ts_node_is_null(ts_node)) {
       jobject res = _marshalNode(env, ts_node);
@@ -326,11 +325,14 @@ JNIEXPORT jobject JNICALL
 Java_ai_serenade_treesitter_TreeSitter_treeCursorCurrentTreeCursorNode(
     JNIEnv* env, jclass self, jlong cursor) {
   TSNode node = ts_tree_cursor_current_node((TSTreeCursor*)cursor);
-  return _marshalTreeCursorNode(
-      env,
-      (TreeCursorNode){ts_node_type(node),
-                       ts_tree_cursor_current_field_name((TSTreeCursor*)cursor),
-                       ts_node_start_byte(node) / 2, ts_node_end_byte(node) / 2});
+
+  TreeCursorNode cursorNode;
+  cursorNode.type = ts_node_type(node);
+  cursorNode.name = ts_tree_cursor_current_field_name((TSTreeCursor*)cursor);
+  cursorNode.startByte = ts_node_start_byte(node) / 2;
+  cursorNode.endByte = ts_node_end_byte(node) / 2;
+
+  return _marshalTreeCursorNode(env, cursorNode);
 }
 
 JNIEXPORT void JNICALL Java_ai_serenade_treesitter_TreeSitter_treeCursorDelete(
@@ -379,7 +381,7 @@ JNIEXPORT jobject JNICALL Java_ai_serenade_treesitter_TreeSitter_queryNew(
   TSQuery* q = ts_query_new(
       lang,
       code_chars,
-      strlen(code_chars),
+      (uint32_t)strlen(code_chars),
       &error_offset,
       &error_type);
 
@@ -427,14 +429,19 @@ JNIEXPORT jobject JNICALL Java_ai_serenade_treesitter_TreeSitter_queryCursorNext
 
   // if we have a next candidate
   if (has_next) {
-    jobject captures[match.capture_count];
+    jobject* captures = new jobject[match.capture_count];
 
     // Get all the capture objects with the corresponding nodes. We will then add them to the list of objects
     for(int i = 0 ; i < match.capture_count ; i++) {
         captures[i] = _marshalQueryMatchCapture(env, match.captures[i].node, match.captures[i].index);
     }
     // make the object with all the captures
-    return _marshalQueryMatch(env, match.id, match.pattern_index, match.capture_count, captures);
+    jobject result = _marshalQueryMatch(env, match.id, match.pattern_index, match.capture_count, captures);
+
+    // Don't forget to delete the array when you're done with it
+    delete[] captures;
+
+    return result;
   }
   return NULL;
 }
