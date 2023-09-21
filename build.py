@@ -11,12 +11,20 @@ import tempfile
 
 # adapted from https://github.com/tree-sitter/py-tree-sitter
 def build(repositories, output_path="libjava-tree-sitter", arch=None, verbose=False):
-    if arch and platform.system() != "Darwin":
-        arch = "64" if "64" in arch else "32"
-    if arch and platform.system() == "Darwin":
-        arch = "arm64" if "aarch64" in arch else arch
+    if arch:
+        if platform.system() != "Darwin":
+            arch = "64" if "64" in arch else "32"
+        else:
+            arch = "arm64" if "aarch64" in arch else arch
 
-    output_path = f"{output_path}.{'dylib' if platform.system() == 'Darwin' else 'so'}"
+    if platform.system() == 'Darwin':
+        output_extention = 'dylib'
+    elif platform.system() == 'Linux':
+        output_extention = 'so'
+    else:
+        output_extention = 'dll'
+
+    output_path = f"{output_path}.{output_extention}"
     here = os.path.dirname(os.path.realpath(__file__))
     env = ""
     if arch:
@@ -33,7 +41,6 @@ def build(repositories, output_path="libjava-tree-sitter", arch=None, verbose=Fa
         f"{env} make -C \"{os.path.join(here, 'tree-sitter')}\" {'> /dev/null' if not verbose else ''}"
     )
 
-    # cpp = False
     source_paths = [
         os.path.join(here, "lib", "ai_serenade_treesitter_TreeSitter.cc"),
         os.path.join(here, "lib", "ai_serenade_treesitter_Languages.cc"),
@@ -46,7 +53,6 @@ def build(repositories, output_path="libjava-tree-sitter", arch=None, verbose=Fa
         scanner_c = os.path.join(src_path, "scanner.c")
         scanner_cc = os.path.join(src_path, "scanner.cc")
         if os.path.exists(scanner_cc):
-            # cpp = True
             source_paths.append(scanner_cc)
         elif os.path.exists(scanner_c):
             source_paths.append(scanner_c)
@@ -57,7 +63,7 @@ def build(repositories, output_path="libjava-tree-sitter", arch=None, verbose=Fa
         )
 
     source_mtimes = [os.path.getmtime(__file__)] + [os.path.getmtime(path) for path in source_paths]
-    # if cpp:
+
     if ctypes.util.find_library("stdc++"):
         compiler.add_library("stdc++")
     elif ctypes.util.find_library("c++"):
@@ -72,7 +78,7 @@ def build(repositories, output_path="libjava-tree-sitter", arch=None, verbose=Fa
         for source_path in source_paths:
             flags = ["-O3"]
 
-            if platform.system() == "Linux":
+            if platform.system() == "Linux" or platform.system() == "Windows":
                 flags.append("-fPIC")
 
             if source_path.endswith(".c"):
@@ -91,6 +97,8 @@ def build(repositories, output_path="libjava-tree-sitter", arch=None, verbose=Fa
                 include_dirs.append(os.path.join(os.environ["JAVA_HOME"], "include", "linux"))
             elif platform.system() == "Darwin":
                 include_dirs.append(os.path.join(os.environ["JAVA_HOME"], "include", "darwin"))
+            elif platform.system() == "Windows":
+                include_dirs.append(os.path.join(os.environ["JAVA_HOME"], "include", "win32"))
 
             object_paths.append(
                 compiler.compile(
@@ -104,6 +112,8 @@ def build(repositories, output_path="libjava-tree-sitter", arch=None, verbose=Fa
         extra_preargs = []
         if platform.system() == "Darwin":
             extra_preargs.append("-dynamiclib")
+        elif platform.system() == "Windows":
+            extra_preargs.append("-shared")
 
         if arch:
             extra_preargs += ["-arch", arch] if platform.system() == "Darwin" else [f"-m{arch}"]

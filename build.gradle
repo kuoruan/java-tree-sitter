@@ -20,19 +20,20 @@ task buildSharedObject {
     inputs.file "lib/ai_serenade_treesitter_TreeSitter.cc"
     inputs.file "lib/ai_serenade_treesitter_TreeSitter.h"
     outputs.file "${sharedObject}.dylib"
-    outputs.file "libjava-tree-sitter.so"
+    outputs.file "${sharedObject}.so"
+    outputs.file "${sharedObject}.dll"
 
     doLast {
         exec {
-//            commandLine "./build.py", "libjava-tree-sitter", "src/test/tree-sitter-python"
             commandLine "./build.py", "-a", "${System.getProperty("os.arch")}", "src/test/tree-sitter-python", "-o", "${sharedObject}"
         }
     }
 }
 
 clean {
-    delete "libjava-tree-sitter.dylib"
-    delete "libjava-tree-sitter.so"
+    delete "${sharedObject}.dylib"
+    delete "${sharedObject}.so"
+    delete "${sharedObject}.dll"
 }
 
 compileJava {
@@ -52,6 +53,12 @@ publishing {
         maven(MavenPublication) {
             from components.java
         }
+    }
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(11)
     }
 }
 
