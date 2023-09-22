@@ -36,7 +36,6 @@ static jfieldID _queryCreationClassPointer;
 static jfieldID _queryCreationClassErrorType;
 static jfieldID _queryCreationClassErrorOffset;
 
-
 static jclass _queryMatch;
 static jfieldID _queryMatchId;
 static jfieldID _queryMatchPatternIndex;
@@ -46,7 +45,6 @@ static jfieldID _queryMatchCaptures;
 static jclass _queryMatchCapture;
 static jfieldID _queryMatchCaptureNode;
 static jfieldID _queryMatchCaptureIndex;
-
 
 #define _loadClass(VARIABLE, NAME)             \
   {                                            \
@@ -86,14 +84,16 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
 
   // load class position
   _loadClass(_positionClass, "ai/serenade/treesitter/Position");
-  _loadField(_positionRow, _positionClass, "row","I");
-  _loadField(_positionColumn, _positionClass, "column","I");
+  _loadField(_positionRow, _positionClass, "row", "I");
+  _loadField(_positionColumn, _positionClass, "column", "I");
 
-
-  _loadClass(_queryCreationClass, "ai/serenade/treesitter/query/internals/QueryCreationResult");
+  _loadClass(_queryCreationClass,
+             "ai/serenade/treesitter/query/internals/QueryCreationResult");
   _loadField(_queryCreationClassPointer, _queryCreationClass, "pointer", "J");
-  _loadField(_queryCreationClassErrorType, _queryCreationClass, "errorType", "I");
-  _loadField(_queryCreationClassErrorOffset, _queryCreationClass, "errorOffset", "I");
+  _loadField(_queryCreationClassErrorType, _queryCreationClass, "errorType",
+             "I");
+  _loadField(_queryCreationClassErrorOffset, _queryCreationClass, "errorOffset",
+             "I");
 
   _loadClass(_queryMatch, "ai/serenade/treesitter/query/QueryMatch");
   _loadField(_queryMatchId, _queryMatch, "id", "I");
@@ -101,11 +101,11 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
   _loadField(_queryMatchCaptureCount, _queryMatch, "captureCount", "I");
   _loadField(_queryMatchCaptures, _queryMatch, "captures", "Ljava/util/List;");
 
-
-  _loadClass(_queryMatchCapture, "ai/serenade/treesitter/query/QueryMatchCapture");
-  _loadField(_queryMatchCaptureNode, _queryMatchCapture, "node", "Lai/serenade/treesitter/Node;");
+  _loadClass(_queryMatchCapture,
+             "ai/serenade/treesitter/query/QueryMatchCapture");
+  _loadField(_queryMatchCaptureNode, _queryMatchCapture, "node",
+             "Lai/serenade/treesitter/Node;");
   _loadField(_queryMatchCaptureIndex, _queryMatchCapture, "index", "I");
-
 
   return JNI_VERSION;
 }
@@ -126,8 +126,10 @@ jobject _marshalPosition(JNIEnv* env, TSPoint point) {
   return javaObject;
 }
 
-jobject _marshalQueryMatch(JNIEnv* env, int id, int patternIndex, int captureCount, jobject captures[]) {
-  // invoke the constructor instead of allocating memory directly so that the array is instantiated.
+jobject _marshalQueryMatch(JNIEnv* env, int id, int patternIndex,
+                           int captureCount, jobject captures[]) {
+  // invoke the constructor instead of allocating memory directly so that the
+  // array is instantiated.
   jmethodID constructor = env->GetMethodID(_queryMatch, "<init>", "()V");
   jobject javaObject = env->NewObject(_queryMatch, constructor);
 
@@ -140,16 +142,17 @@ jobject _marshalQueryMatch(JNIEnv* env, int id, int patternIndex, int captureCou
   // the constructor to make sure the list is instantiated.
   jobject capturesList = env->GetObjectField(javaObject, _queryMatchCaptures);
   jclass listClass = env->GetObjectClass(capturesList);
-  jmethodID addMethod = env->GetMethodID(listClass, "add", "(Ljava/lang/Object;)Z");
-  for(int i = 0 ; i < captureCount ; i++) {
-      env->CallBooleanMethod(capturesList, addMethod, captures[i]);
-
+  jmethodID addMethod =
+      env->GetMethodID(listClass, "add", "(Ljava/lang/Object;)Z");
+  for (int i = 0; i < captureCount; i++) {
+    env->CallBooleanMethod(capturesList, addMethod, captures[i]);
   }
 
   return javaObject;
 }
 
-jobject _marshalQueryCreationResult(JNIEnv* env, jlong pointer, int error_type, uint32_t error_offset) {
+jobject _marshalQueryCreationResult(JNIEnv* env, jlong pointer, int error_type,
+                                    uint32_t error_offset) {
   jobject javaObject = env->AllocObject(_queryCreationClass);
   env->SetLongField(javaObject, _queryCreationClassPointer, pointer);
   env->SetIntField(javaObject, _queryCreationClassErrorType, error_type);
@@ -192,7 +195,8 @@ jobject _marshalTreeCursorNode(JNIEnv* env, TreeCursorNode node) {
 
 jobject _marshalQueryMatchCapture(JNIEnv* env, TSNode node, int index) {
   jobject javaObject = env->AllocObject(_queryMatchCapture);
-  env->SetObjectField(javaObject, _queryMatchCaptureNode, _marshalNode(env, node));
+  env->SetObjectField(javaObject, _queryMatchCaptureNode,
+                      _marshalNode(env, node));
   env->SetIntField(javaObject, _queryMatchCaptureIndex, index);
   return javaObject;
 }
@@ -203,52 +207,62 @@ JNIEXPORT jobject JNICALL Java_ai_serenade_treesitter_TreeSitter_nodeChild(
       env, ts_node_child(_unmarshalNode(env, node), (uint32_t)child));
 }
 
-JNIEXPORT jobject JNICALL Java_ai_serenade_treesitter_TreeSitter_nodeChildByFieldName(
-    JNIEnv* env, jclass self, jobject node, jstring fieldName) {
+JNIEXPORT jobject JNICALL
+Java_ai_serenade_treesitter_TreeSitter_nodeChildByFieldName(JNIEnv* env,
+                                                            jclass self,
+                                                            jobject node,
+                                                            jstring fieldName) {
   const char* fieldNameChars = env->GetStringUTFChars(fieldName, NULL);
 
-  TSNode ts_node = ts_node_child_by_field_name(_unmarshalNode(env, node), fieldNameChars, (uint32_t)strlen(fieldNameChars));
+  TSNode ts_node =
+      ts_node_child_by_field_name(_unmarshalNode(env, node), fieldNameChars,
+                                  (uint32_t)strlen(fieldNameChars));
 
   if (!ts_node_is_null(ts_node)) {
-      jobject res = _marshalNode(env, ts_node);
-      env->ReleaseStringUTFChars(fieldName, fieldNameChars);
-      return res;
+    jobject res = _marshalNode(env, ts_node);
+    env->ReleaseStringUTFChars(fieldName, fieldNameChars);
+    return res;
   }
   return NULL;
 }
 
-JNIEXPORT jint JNICALL Java_ai_serenade_treesitter_TreeSitter_nodeDescendantCount
-  (JNIEnv* env, jclass self, jobject node) {
-    TSNode ts_node = _unmarshalNode(env, node);
-
-    return (jint)ts_node_descendant_count(ts_node);
+JNIEXPORT jint JNICALL
+Java_ai_serenade_treesitter_TreeSitter_nodeDescendantCount(JNIEnv* env,
+                                                           jclass self,
+                                                           jobject node) {
+  return (jint)ts_node_descendant_count(_unmarshalNode(env, node));
 }
 
-JNIEXPORT jobject JNICALL Java_ai_serenade_treesitter_TreeSitter_nodeDescendantForByteRange
-  (JNIEnv* env, jclass self, jobject node, jint start, jint end) {
-    TSNode ts_node = _unmarshalNode(env, node);
+JNIEXPORT jobject JNICALL
+Java_ai_serenade_treesitter_TreeSitter_nodeDescendantForByteRange(
+    JNIEnv* env, jclass self, jobject node, jint start, jint end) {
+  TSNode ts_node = _unmarshalNode(env, node);
 
-    return _marshalNode(env, ts_node_descendant_for_byte_range(ts_node, (uint32_t)start, (uint32_t)end));
+  return _marshalNode(env, ts_node_descendant_for_byte_range(
+                               ts_node, (uint32_t)start, (uint32_t)end));
 }
 
-JNIEXPORT jobject JNICALL Java_ai_serenade_treesitter_TreeSitter_nodeNamedDescendantForByteRange
-  (JNIEnv* env, jclass self, jobject node, jint start, jint end) {
-    TSNode ts_node = _unmarshalNode(env, node);
+JNIEXPORT jobject JNICALL
+Java_ai_serenade_treesitter_TreeSitter_nodeNamedDescendantForByteRange(
+    JNIEnv* env, jclass self, jobject node, jint start, jint end) {
+  TSNode ts_node = _unmarshalNode(env, node);
 
-    return _marshalNode(env, ts_node_named_descendant_for_byte_range(ts_node, (uint32_t)start, (uint32_t)end));
+  return _marshalNode(env, ts_node_named_descendant_for_byte_range(
+                               ts_node, (uint32_t)start, (uint32_t)end));
 }
 
-JNIEXPORT jobject JNICALL Java_ai_serenade_treesitter_TreeSitter_nodeStartPosition(
-    JNIEnv* env, jclass self, jobject node) {
-
+JNIEXPORT jobject JNICALL
+Java_ai_serenade_treesitter_TreeSitter_nodeStartPosition(JNIEnv* env,
+                                                         jclass self,
+                                                         jobject node) {
   TSNode ts_node = _unmarshalNode(env, node);
 
   return _marshalPosition(env, ts_node_start_point(ts_node));
 }
 
-JNIEXPORT jobject JNICALL Java_ai_serenade_treesitter_TreeSitter_nodeEndPosition(
-    JNIEnv* env, jclass self, jobject node) {
-
+JNIEXPORT jobject JNICALL
+Java_ai_serenade_treesitter_TreeSitter_nodeEndPosition(JNIEnv* env, jclass self,
+                                                       jobject node) {
   TSNode ts_node = _unmarshalNode(env, node);
   return _marshalPosition(env, ts_node_end_point(ts_node));
 }
@@ -260,8 +274,8 @@ JNIEXPORT jint JNICALL Java_ai_serenade_treesitter_TreeSitter_nodeChildCount(
 
 JNIEXPORT jboolean JNICALL Java_ai_serenade_treesitter_TreeSitter_nodeHasError(
     JNIEnv* env, jclass self, jobject node) {
-    // use conditional to avoid conversion from bool to jboolean (unsigned char)
-    return ts_node_has_error(_unmarshalNode(env, node)) ? JNI_TRUE : JNI_FALSE;
+  // use conditional to avoid conversion from bool to jboolean (unsigned char)
+  return ts_node_has_error(_unmarshalNode(env, node)) ? JNI_TRUE : JNI_FALSE;
 }
 
 JNIEXPORT jstring JNICALL Java_ai_serenade_treesitter_TreeSitter_nodeString(
@@ -315,7 +329,8 @@ JNIEXPORT jlong JNICALL Java_ai_serenade_treesitter_TreeSitter_parserParseBytes(
     jint length) {
   jbyte* source = env->GetByteArrayElements(source_bytes, NULL);
   jlong result = (jlong)ts_parser_parse_string_encoding(
-      (TSParser*)parser, NULL, reinterpret_cast<const char*>(source), length, TSInputEncodingUTF16);
+      (TSParser*)parser, NULL, reinterpret_cast<const char*>(source), length,
+      TSInputEncodingUTF16);
   env->ReleaseByteArrayElements(source_bytes, source, JNI_ABORT);
   return result;
 }
@@ -395,41 +410,41 @@ JNIEXPORT jobject JNICALL Java_ai_serenade_treesitter_TreeSitter_treeRootNode(
 
 JNIEXPORT jobject JNICALL Java_ai_serenade_treesitter_TreeSitter_queryNew(
     JNIEnv* env, jclass self, jlong language, jstring code) {
-  const TSLanguage* lang = (TSLanguage*) language;
+  const TSLanguage* lang = (TSLanguage*)language;
   const char* code_chars = env->GetStringUTFChars(code, NULL);
   uint32_t error_offset;
   TSQueryError error_type;
-  TSQuery* q = ts_query_new(
-      lang,
-      code_chars,
-      (uint32_t)strlen(code_chars),
-      &error_offset,
-      &error_type);
+  TSQuery* q = ts_query_new(lang, code_chars, (uint32_t)strlen(code_chars),
+                            &error_offset, &error_type);
 
   return _marshalQueryCreationResult(env, (jlong)q, error_type, error_offset);
 }
 
 JNIEXPORT jint JNICALL Java_ai_serenade_treesitter_TreeSitter_queryCaptureCount(
     JNIEnv* env, jclass self, jlong query) {
-    return (jint)ts_query_capture_count((const TSQuery*)query);
+  return (jint)ts_query_capture_count((const TSQuery*)query);
 }
 
-JNIEXPORT jstring JNICALL Java_ai_serenade_treesitter_TreeSitter_queryCaptureNameForId(
-    JNIEnv* env, jclass self, jlong query, jint id) {
-    uint32_t len;
-    const char* ts_res = ts_query_capture_name_for_id((const TSQuery*)query, (uint32_t)id, &len);
-    jstring result = env->NewStringUTF(ts_res);
-    return result;
+JNIEXPORT jstring JNICALL
+Java_ai_serenade_treesitter_TreeSitter_queryCaptureNameForId(JNIEnv* env,
+                                                             jclass self,
+                                                             jlong query,
+                                                             jint id) {
+  uint32_t len;
+  const char* ts_res =
+      ts_query_capture_name_for_id((const TSQuery*)query, (uint32_t)id, &len);
+  jstring result = env->NewStringUTF(ts_res);
+  return result;
 }
 
 JNIEXPORT void JNICALL Java_ai_serenade_treesitter_TreeSitter_queryDelete(
     JNIEnv* env, jclass self, jlong pointer) {
-  ts_query_delete((TSQuery*) pointer);
+  ts_query_delete((TSQuery*)pointer);
 }
 
 JNIEXPORT void JNICALL Java_ai_serenade_treesitter_TreeSitter_queryCursorDelete(
     JNIEnv* env, jclass self, jlong pointer) {
-  ts_query_cursor_delete((TSQueryCursor*) pointer);
+  ts_query_cursor_delete((TSQueryCursor*)pointer);
 }
 
 JNIEXPORT jlong JNICALL Java_ai_serenade_treesitter_TreeSitter_queryCursorNew(
@@ -439,25 +454,31 @@ JNIEXPORT jlong JNICALL Java_ai_serenade_treesitter_TreeSitter_queryCursorNew(
 
 JNIEXPORT void JNICALL Java_ai_serenade_treesitter_TreeSitter_queryCursorExec(
     JNIEnv* env, jclass self, jlong queryCursor, jlong query, jobject node) {
-
-  ts_query_cursor_exec((TSQueryCursor *)queryCursor, (const TSQuery *)query, _unmarshalNode(env, node));
+  ts_query_cursor_exec((TSQueryCursor*)queryCursor, (const TSQuery*)query,
+                       _unmarshalNode(env, node));
 }
 
-JNIEXPORT jobject JNICALL Java_ai_serenade_treesitter_TreeSitter_queryCursorNextMatch(
-    JNIEnv* env, jclass self, jlong queryCursor) {
+JNIEXPORT jobject JNICALL
+Java_ai_serenade_treesitter_TreeSitter_queryCursorNextMatch(JNIEnv* env,
+                                                            jclass self,
+                                                            jlong queryCursor) {
   TSQueryMatch match;
-  bool has_next = ts_query_cursor_next_match((TSQueryCursor *)queryCursor, &match);
+  bool has_next =
+      ts_query_cursor_next_match((TSQueryCursor*)queryCursor, &match);
 
   // if we have a next candidate
   if (has_next) {
     jobject* captures = new jobject[match.capture_count];
 
-    // Get all the capture objects with the corresponding nodes. We will then add them to the list of objects
-    for(int i = 0 ; i < match.capture_count ; i++) {
-        captures[i] = _marshalQueryMatchCapture(env, match.captures[i].node, match.captures[i].index);
+    // Get all the capture objects with the corresponding nodes. We will then
+    // add them to the list of objects
+    for (int i = 0; i < match.capture_count; i++) {
+      captures[i] = _marshalQueryMatchCapture(env, match.captures[i].node,
+                                              match.captures[i].index);
     }
     // make the object with all the captures
-    jobject result = _marshalQueryMatch(env, match.id, match.pattern_index, match.capture_count, captures);
+    jobject result = _marshalQueryMatch(env, match.id, match.pattern_index,
+                                        match.capture_count, captures);
 
     // Don't forget to delete the array when you're done with it
     delete[] captures;
