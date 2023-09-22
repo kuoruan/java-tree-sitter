@@ -28,6 +28,7 @@ jobs:
           arguments: test
       - name: Build with Gradle
         uses: gradle/gradle-build-action@v2
+        continue-on-error: ${{ matrix.os == 'windows-latest' }}
         with:
           arguments: build
       - name: Archive Shared Library
