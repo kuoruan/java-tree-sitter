@@ -43,12 +43,8 @@ def build(repositories, output_path="libjava-tree-sitter", arch=None, verbose=Fa
     source_paths = [
         os.path.join(here, "lib", "ai_serenade_treesitter_TreeSitter.cc"),
         os.path.join(here, "lib", "ai_serenade_treesitter_Languages.cc"),
+        os.path.join(here, "tree-sitter", "lib", "src", "lib.c")
     ]
-
-    # add source files in tree-sitter/lib/src
-    for filename in os.listdir(os.path.join(here, "tree-sitter", "lib", "src")):
-        if filename.endswith(".c") and not filename.endswith("lib.c"):
-            source_paths.append(os.path.join(here, "tree-sitter", "lib", "src", filename))
 
     compiler = distutils.ccompiler.new_compiler()
     for repository in repositories:
