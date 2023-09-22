@@ -394,9 +394,9 @@ JNIEXPORT jint JNICALL Java_ai_serenade_treesitter_TreeSitter_queryCaptureCount(
 }
 
 JNIEXPORT jstring JNICALL Java_ai_serenade_treesitter_TreeSitter_queryCaptureNameForId(
-    JNIEnv* env, jclass self, jlong query, int id) {
+    JNIEnv* env, jclass self, jlong query, jint id) {
     uint32_t len;
-    const char* ts_res = ts_query_capture_name_for_id((const TSQuery*)query, id, &len);
+    const char* ts_res = ts_query_capture_name_for_id((const TSQuery*)query, (uint32_t)id, &len);
     jstring result = env->NewStringUTF(ts_res);
     return result;
 }
