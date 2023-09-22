@@ -217,6 +217,27 @@ JNIEXPORT jobject JNICALL Java_ai_serenade_treesitter_TreeSitter_nodeChildByFiel
   return NULL;
 }
 
+JNIEXPORT jint JNICALL Java_ai_serenade_treesitter_TreeSitter_nodeDescendantCount
+  (JNIEnv* env, jclass self, jobject node) {
+    TSNode ts_node = _unmarshalNode(env, node);
+
+    return (jint)ts_node_descendant_count(ts_node);
+}
+
+JNIEXPORT jobject JNICALL Java_ai_serenade_treesitter_TreeSitter_nodeDescendantForByteRange
+  (JNIEnv* env, jclass self, jobject node, jint start, jint end) {
+    TSNode ts_node = _unmarshalNode(env, node);
+
+    return _marshalNode(env, ts_node_descendant_for_byte_range(ts_node, (uint32_t)start, (uint32_t)end));
+}
+
+JNIEXPORT jobject JNICALL Java_ai_serenade_treesitter_TreeSitter_nodeNamedDescendantForByteRange
+  (JNIEnv* env, jclass self, jobject node, jint start, jint end) {
+    TSNode ts_node = _unmarshalNode(env, node);
+
+    return _marshalNode(env, ts_node_named_descendant_for_byte_range(ts_node, (uint32_t)start, (uint32_t)end));
+}
+
 JNIEXPORT jobject JNICALL Java_ai_serenade_treesitter_TreeSitter_nodeStartPosition(
     JNIEnv* env, jclass self, jobject node) {
 

@@ -23,6 +23,18 @@ public class Node {
         return TreeSitter.nodeChildByFieldName(this, fieldName);
     }
 
+    public int getDescendantCount() {
+        return TreeSitter.nodeDescendantCount(this);
+    }
+
+    public Node getDescendantForByteRange(int start, int end) {
+        return TreeSitter.nodeDescendantForByteRange(this, start, end);
+    }
+
+    public Node getNamedDescendantForByteRange(int start, int end) {
+        return TreeSitter.nodeNamedDescendantForByteRange(this, start, end);
+    }
+
     public Position getStartPosition() {
         return TreeSitter.nodeStartPosition(this);
     }

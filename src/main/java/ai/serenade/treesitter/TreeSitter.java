@@ -13,6 +13,12 @@ public class TreeSitter {
 
     public static native Node nodeChildByFieldName(Node node, String fieldName);
 
+    public static native int nodeDescendantCount(Node node);
+
+    public static native Node nodeDescendantForByteRange(Node node, int start, int ent);
+
+    public static native Node nodeNamedDescendantForByteRange(Node node, int start, int end);
+
     public static native Position nodeStartPosition(Node node);
 
     public static native Position nodeEndPosition(Node node);
