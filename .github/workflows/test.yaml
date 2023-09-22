@@ -21,6 +21,16 @@ jobs:
           distribution: 'temurin'
       - name: Validate Gradle wrapper
         uses: gradle/wrapper-validation-action@v1
+      - name: Build Shared Library
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: buildSharedObject
+      - name: Archive Shared Library
+        uses: actions/upload-artifact@v3
+        with:
+          name: lib-${{ matrix.os }}
+          path: |
+            libjava-tree-sitter.*
       - name: Run tests
         uses: gradle/gradle-build-action@v2
         with:
@@ -29,10 +39,3 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           arguments: build
-      - name: Archive Library
-        uses: actions/upload-artifact@v3
-        with:
-          name: dist-${{ matrix.os }}
-          path: |
-            libjava-tree-sitter.*
-            build/libs/java-tree-sitter-*.jar
